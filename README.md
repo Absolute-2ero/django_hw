@@ -17,3 +17,6 @@ The meanings of these parameters are:
 6. -n: The number of wordlists you want to generate.
 ```
 The wordlists will be stored in `./generated`.
+## Environment Requirements
+Basic requirements are written in `requirements.yaml.` Run `conda env create -n <env_name> -f ./requirements.yaml` to add a new environment to your conda.
+This projects uses pygtrans pack, which is already included in requirements.yaml.
