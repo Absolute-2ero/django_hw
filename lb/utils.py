@@ -3,27 +3,6 @@ from random import randint
 import functools
 import numpy as np
 
-import math
-
-def interpolate(x1, x2, y1, y2, x):
-    if x < x1:
-        return y1
-    if x > x2:
-        return y2
-    return math.sqrt((x - x1) / (x2 - x1)) * (y2 - y1) + y1
-
-def main_score(result: list):
-    """
-    :param result: catagory accuracy, element value in [0, 1]
-    :return: main_score
-    """
-    mean_result = sum(result) / 3
-    return round(
-        55 * interpolate(.5, .8, 0, 1, mean_result) +
-        15 * interpolate(.5, .7, 0, 1, result[0]) +
-        15 * interpolate(.5, .9, 0, 1, result[1]) +
-        15 * interpolate(.5, .75, 0, 1, result[2])
-    )
 
 def get_leaderboard():
     """
@@ -76,19 +55,19 @@ def get_leaderboard():
     for s in all_submission:
         if s.user_id not in subs or (s.user_id in subs and s.time > subs[s.user_id].time):
             subs[s.user_id] = s
-
     subs = sorted(subs.values(), key=lambda x: (-x.score, x.time))
-    return [
-        {
+    dc_list = []
+    for obj in subs:
+        dc = {
             "user": obj.user.username,
             "score": obj.score,
-            "subs": [int(x) for x in obj.subs.split()],
+            "subs": obj.subs,
             "avatar": obj.avatar,
             "time": obj.time,
             "votes": obj.user.votes
         }
-        for obj in subs
-    ]
+        dc_list.append(dc)
+    return dc_list
 
     # 方案3：调用 Django 的 API (俺不会了
     # ...

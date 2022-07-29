@@ -52,12 +52,19 @@ def history(req: HttpRequest, username: str):
 @method(["POST"])
 @csrf_exempt
 def submit(req: HttpRequest):
-    info = json.load(req.body)
+    try:
+        info = json.loads(req.body)
+    except:
+        return JsonResponse({
+            "code": 114514,
+            "msg": "你是一个，一个一个一个不合法的json啊啊啊"
+        })
     if not all(k in info.keys() for k in ("user", "avatar", "content")):
         return JsonResponse({
             "code": 1,
             "msg": "你是一个，一个一个一个不全的参数啊啊啊"
         })
+
 
     if len(info['user']) > 255:
         return JsonResponse({
@@ -65,21 +72,24 @@ def submit(req: HttpRequest):
             "msg": "你是一个，一个一个一个太长的用户啊啊啊"
         })
 
-    if len(info['avatar']) > 100_000:
+    if len(info['avatar']) > 100000:
         return JsonResponse({
             "code": -2,
             "msg": "你是一个，一个一个一个太大的图像啊啊啊",
         })
+
     try:
         main_score, sub_score = utils.judge(info['content'])
-    except Exception("114514"):
+    except:
         return JsonResponse({
             "code": -3,
             "msg": "你是一个，一个一个一个非法的内容啊啊啊"
         })
+
     user = User.objects.filter(username=info['user']).first()
     if not user:
         user = User.objects.create(username=info['user'], votes=0)
+
     Submission.objects.create(user=user, avatar=info['avatar'], time=time.time(), score=main_score, subs=sub_score)
     return JsonResponse({
         "code": 0,
@@ -99,16 +109,21 @@ def vote(req: HttpRequest):
             "code": -1,
             "msg": "压打莫压打，牡蛎莫牡蛎"
         })
-
-    user = json.loads(req.body)['user']
-    user = User.objects.filter(username=user).first()
-    if not user:
+    try:
+        user = json.loads(req.body)['user']
+        user = User.objects.filter(username=user).first()
+        if not user:
+            return JsonResponse({
+                "code": -1,
+                "msg": "该用户没有注册，已经等不及了，快端上来罢"
+            })
+        user.votes += 1
+        user.save()
+    except:
         return JsonResponse({
             "code": -1,
-            "msg": "该用户没有注册，已经等不及了，快端上来罢"
+            "msg": "你是一个，一个一个一个不合法的json啊啊啊"
         })
-    user.votes += 1
-    user.save()
     return JsonResponse({
         "code": 0,
         "data": {
